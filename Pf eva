@@ -1,47 +1,53 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
 #include <math.h>
+#include <string.h>
+#include <ctype.h>
 
-#define MAX_SIZE 100
-
-typedef struct {
-    int arr[MAX_SIZE];
-    int top;
-} Stack;
-
-void initialize(Stack *s) { s->top = -1; }
-int isEmpty(Stack *s) { return s->top == -1; }
-void push(Stack *s, int item) { s->arr[++(s->top)] = item; }
-int pop(Stack *s) { return s->arr[(s->top)--]; }
-
-int performOperation(char op, int a, int b) {
-    switch (op) {
-        case '+': return a + b;
-        case '-': return a - b;
-        case '*': return a * b;
-        case '/': return a / b;
-        case '^': return (int)pow(a, b);
-        default: exit(1);
+/* Function to evaluate */
+double compute(char symbol, double op1, double op2) {
+    switch (symbol) {
+        case '+': return op1 + op2;
+        case '-': return op1 - op2;
+        case '*': return op1 * op2;
+        case '/': return op1 / op2;
+        case '^': 
+        case '$': return pow(op1, op2);
+        default: 
+            printf("Invalid operator encountered: %c\n", symbol);
+            return 0;
     }
-}
-
-int evaluatePostfix(char* exp) {
-    Stack s; initialize(&s);
-    for (int i = 0; exp[i] != '\0'; i++) {
-        if (isdigit(exp[i])) push(&s, exp[i] - '0');
-        else {
-            int b = pop(&s), a = pop(&s);
-            push(&s, performOperation(exp[i], a, b));
-        }
-    }
-    return pop(&s);
 }
 
 int main() {
-    char exp[MAX_SIZE];
-    printf("Enter postfix expression: ");
-    scanf("%s", exp);
-    printf("Result: %d\n", evaluatePostfix(exp));
+    double s[20], res, op1, op2;
+    int top = -1, i;
+    char postfix[20], symbol;
+
+    printf("Enter the postfix expression: ");
+    scanf("%s", postfix);
+
+    for (i = 0; i < strlen(postfix); i++) {
+        symbol = postfix[i];
+
+        if (isdigit(symbol)) { 
+            s[++top] = symbol - '0';
+        } else {
+            if (top < 1) {
+                printf("Error: Not enough operands in the stack.\n");
+                return -1;
+            }
+            op2 = s[top--];
+            op1 = s[top--];
+            res = compute(symbol, op1, op2);
+            s[++top] = res;
+        }
+    }
+
+    if (top != 0) {
+        printf("Error: Invalid postfix expression.\n");
+        return -1;
+    }
+
+    printf("The result is %f\n", s[top]);
     return 0;
 }
